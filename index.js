@@ -26,6 +26,7 @@ const db = client.db("heroHomeDB");
 const serviceCollections = db.collection("services");
 const bookedCollections = db.collection("bookings");
 const addServiceCollections = db.collection("addServices");
+const reviewCollections = db.collection("reviews");
 
 async function run() {
   try {
@@ -235,6 +236,12 @@ async function run() {
       };
 
       const result = await addServiceCollections.updateOne(query, update);
+      res.send(result);
+    });
+
+    app.post("/review", async (req, res) => {
+      const newReview = req.body;
+      const result = await reviewCollections.insertOne(newReview);
       res.send(result);
     });
 
