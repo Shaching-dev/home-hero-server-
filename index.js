@@ -164,7 +164,7 @@ async function run() {
     //   res.send(result);
     // });
 
-    const { ObjectId } = require("mongodb");
+    // const { ObjectId } = require("mongodb");
 
     // 1. ADD SERVICE (already good, just keep it)
     app.post("/addServices", async (req, res) => {
@@ -206,10 +206,9 @@ async function run() {
     //   res.send(result);
     // });
 
-    // 4. UPDATE ONLY MY SERVICE (add email check)
     app.patch("/addServices/:id", async (req, res) => {
       const id = req.params.id;
-      const email = req.body.provider_email; // or req.query.email
+      const email = req.body.provider_email;
 
       if (!email) {
         return res.status(400).send({ error: "Email required" });
@@ -218,7 +217,7 @@ async function run() {
       const updatetedService = req.body;
       const query = {
         _id: new ObjectId(id),
-        provider_email: email, // Only update own service
+        provider_email: email,
       };
 
       const update = {
@@ -242,6 +241,12 @@ async function run() {
     app.post("/review", async (req, res) => {
       const newReview = req.body;
       const result = await reviewCollections.insertOne(newReview);
+      res.send(result);
+    });
+
+    app.get("/review", async (req, res) => {
+      const cursor = reviewCollections.find();
+      const result = await cursor.toArray();
       res.send(result);
     });
 
