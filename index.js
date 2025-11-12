@@ -111,13 +111,6 @@ async function run() {
       res.send(result);
     });
 
-    // // -------get add services apis here
-    // app.get("/addServices", async (req, res) => {
-    //   const cursor = addServiceCollections.find();
-    //   const result = await cursor.toArray();
-    //   res.send(result);
-    // });
-
     // // delte my services
 
     app.delete("/addServices/:id", async (req, res) => {
@@ -129,36 +122,6 @@ async function run() {
 
     // // ----update service apis here
 
-    // app.patch("/addServices/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const query = { _id: new ObjectId(id) };
-    //   const updatetedService = req.body;
-    //   const update = {
-    //     $set: {
-    //       service_Name: updatetedService.service_Name,
-    //       service_price: updatetedService.service_price,
-    //       provider_description: updatetedService.provider_description,
-    //       service_category: updatetedService.service_category,
-    //       service_image: updatetedService.service_image,
-    //       provider_image: updatetedService.provider_image,
-    //       provider_Name: updatetedService.provider_Name,
-    //       provider_email: updatetedService.provider_email,
-    //       provider_phone: updatetedService.provider_phone,
-    //     },
-    //   };
-
-    //   const options = {};
-    //   const result = await addServiceCollections.updateOne(
-    //     query,
-    //     update,
-    //     options
-    //   );
-    //   res.send(result);
-    // });
-
-    // const { ObjectId } = require("mongodb");
-
-    // 1. ADD SERVICE (already good, just keep it)
     app.post("/addServices", async (req, res) => {
       const newService = req.body;
       newService.createdAt = new Date();
@@ -166,7 +129,6 @@ async function run() {
       res.send(result);
     });
 
-    // 2. GET ONLY MY SERVICES (THIS WAS BROKEN!)
     app.get("/addServices", async (req, res) => {
       const email = req.query.email;
 
@@ -174,29 +136,11 @@ async function run() {
         return res.status(400).send({ error: "Email is required" });
       }
 
-      const query = { provider_email: email }; // ONLY THIS USER'S SERVICES
+      const query = { provider_email: email };
       const cursor = addServiceCollections.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
-
-    // 3. DELETE ONLY MY SERVICE (add email check)
-    // app.delete("/addServices/:id", async (req, res) => {
-    //   const id = req.params.id;
-    //   const email = req.query.email; // Get from query: ?email=user@gmail.com
-
-    //   if (!email) {
-    //     return res.status(400).send({ error: "Email required" });
-    //   }
-
-    //   const query = {
-    //     _id: new ObjectId(id),
-    //     provider_email: email, // Security: only delete own
-    //   };
-
-    //   const result = await addServiceCollections.deleteOne(query);
-    //   res.send(result);
-    // });
 
     app.patch("/addServices/:id", async (req, res) => {
       const id = req.params.id;
@@ -230,14 +174,11 @@ async function run() {
       res.send(result);
     });
 
-    // POST: Add new review
     app.post("/review", async (req, res) => {
       try {
         const newReview = req.body;
         newReview.createdAt = new Date();
         newReview.rating = parseInt(newReview.rating);
-
-        console.log("Received review:", newReview); // Debug log
 
         const result = await reviewCollections.insertOne(newReview);
 
