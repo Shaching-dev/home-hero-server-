@@ -182,14 +182,11 @@ async function run() {
 
         const result = await reviewCollections.insertOne(newReview);
 
-        console.log("Insert result:", result); // Debug log
-
-        // Fetch the complete inserted document to get the MongoDB _id
         const savedReview = await reviewCollections.findOne({
           _id: result.insertedId,
         });
 
-        console.log("Saved review from DB:", savedReview); // Debug log
+        console.log("Saved review from DB:", savedReview);
 
         if (!savedReview) {
           return res
@@ -197,7 +194,6 @@ async function run() {
             .send({ error: "Failed to retrieve saved review" });
         }
 
-        // Send back the complete review object
         res.send(savedReview);
       } catch (error) {
         console.error("Review submission error:", error);
@@ -206,13 +202,12 @@ async function run() {
           .send({ error: "Failed to save review: " + error.message });
       }
     });
-    // GET: All reviews (for testing)
+
     app.get("/review", async (req, res) => {
       const result = await reviewCollections.find().toArray();
       res.send(result);
     });
 
-    // GET: Reviews for specific service — FIXED ROUTE NAME!
     app.get("/reviews/:serviceId", async (req, res) => {
       const { serviceId } = req.params;
       const reviews = await reviewCollections
