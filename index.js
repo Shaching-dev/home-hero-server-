@@ -41,7 +41,7 @@ async function run() {
     // -------services get apis
 
     app.get("/services", async (req, res) => {
-      const cursor = serviceCollections.find();
+      const cursor = serviceCollections.find().sort({ price: -1 });
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -110,14 +110,6 @@ async function run() {
       const result = await bookedCollections.deleteOne(query);
       res.send(result);
     });
-
-    // adding service
-
-    // app.post("/addServices", async (req, res) => {
-    //   const newService = req.body;
-    //   const result = await addServiceCollections.insertOne(newService);
-    //   res.send(result);
-    // });
 
     // // -------get add services apis here
     // app.get("/addServices", async (req, res) => {
@@ -238,16 +230,55 @@ async function run() {
       res.send(result);
     });
 
+    // POST: Add new review
     app.post("/review", async (req, res) => {
-      const newReview = req.body;
-      const result = await reviewCollections.insertOne(newReview);
+      try {
+        const newReview = req.body;
+        newReview.createdAt = new Date();
+        newReview.rating = parseInt(newReview.rating);
+
+        console.log("Received review:", newReview); // Debug log
+
+        const result = await reviewCollections.insertOne(newReview);
+
+        console.log("Insert result:", result); // Debug log
+
+        // Fetch the complete inserted document to get the MongoDB _id
+        const savedReview = await reviewCollections.findOne({
+          _id: result.insertedId,
+        });
+
+        console.log("Saved review from DB:", savedReview); // Debug log
+
+        if (!savedReview) {
+          return res
+            .status(500)
+            .send({ error: "Failed to retrieve saved review" });
+        }
+
+        // Send back the complete review object
+        res.send(savedReview);
+      } catch (error) {
+        console.error("Review submission error:", error);
+        res
+          .status(500)
+          .send({ error: "Failed to save review: " + error.message });
+      }
+    });
+    // GET: All reviews (for testing)
+    app.get("/review", async (req, res) => {
+      const result = await reviewCollections.find().toArray();
       res.send(result);
     });
 
-    app.get("/review", async (req, res) => {
-      const cursor = reviewCollections.find();
-      const result = await cursor.toArray();
-      res.send(result);
+    // GET: Reviews for specific service — FIXED ROUTE NAME!
+    app.get("/reviews/:serviceId", async (req, res) => {
+      const { serviceId } = req.params;
+      const reviews = await reviewCollections
+        .find({ serviceId: serviceId })
+        .sort({ createdAt: -1 })
+        .toArray();
+      res.send(reviews);
     });
 
     await client.db("admin").command({ ping: 1 });
